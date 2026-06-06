@@ -639,6 +639,81 @@ footer{background:#05060c;color:rgba(255,255,255,0.38);padding:56px 32px 28px}
 .mgrl-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:600;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity 0.22s;backdrop-filter:blur(6px)}
 .mgrl-overlay.open{opacity:1;pointer-events:all}
 
+/* ════════════════════════
+   CUSTOM CURSOR
+════════════════════════ */
+*{cursor:none !important}
+#ph-cursor{
+  position:fixed;top:0;left:0;z-index:99999;
+  width:12px;height:12px;border-radius:50%;
+  background:#fff;
+  border:2px solid var(--acc);
+  pointer-events:none;
+  transform:translate(-50%,-50%) scale(1);
+  transition:width .15s,height .15s,transform .15s,background .15s,border-color .15s;
+  box-shadow:0 0 0 1px rgba(0,0,0,0.3);
+}
+#ph-ring{
+  position:fixed;top:0;left:0;z-index:99998;
+  width:36px;height:36px;border-radius:50%;
+  border:1.5px solid var(--acc);
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+  transition:width .2s,height .2s,border-color .2s,opacity .2s;
+  opacity:0.55;
+  background:none;
+}
+body.cursor-hover #ph-cursor{width:8px;height:8px;background:var(--acc);border-color:var(--acc)}
+body.cursor-hover #ph-ring{width:50px;height:50px;opacity:0.9}
+body.cursor-img #ph-cursor{width:16px;height:16px;background:var(--acc);border-color:#fff}
+body.cursor-img #ph-ring{width:58px;height:58px;border-color:rgba(255,255,255,0.8);opacity:0.75}
+@media(hover:none){#ph-cursor,#ph-ring{display:none !important}*{cursor:auto !important}}
+
+/* ════════════════════════
+   SCROLL REVEAL
+════════════════════════ */
+.reveal{
+  opacity:0;
+  transform:translateY(32px);
+  transition:opacity 0.6s cubic-bezier(.4,0,.2,1),transform 0.6s cubic-bezier(.4,0,.2,1);
+}
+.reveal.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+/* stagger delay for grid children */
+.product-grid .reveal:nth-child(2){transition-delay:.06s}
+.product-grid .reveal:nth-child(3){transition-delay:.12s}
+.product-grid .reveal:nth-child(4){transition-delay:.18s}
+.product-grid .reveal:nth-child(5){transition-delay:.1s}
+.product-grid .reveal:nth-child(6){transition-delay:.14s}
+
+/* ════════════════════════
+   HERO VIDEO
+════════════════════════ */
+.hero{position:relative}
+.hero-video-wrap{
+  position:absolute;inset:0;overflow:hidden;z-index:0;
+}
+.hero-video-wrap video{
+  position:absolute;top:50%;left:50%;
+  min-width:100%;min-height:100%;
+  width:auto;height:auto;
+  transform:translate(-50%,-50%);
+  object-fit:cover;
+  opacity:0.42;
+  filter:saturate(0.45) brightness(0.4) hue-rotate(220deg);
+}
+.hero-video-wrap::after{
+  content:'';position:absolute;inset:0;z-index:1;
+  background:linear-gradient(to bottom,rgba(4,5,12,0.5) 0%,rgba(4,5,12,0.45) 40%,rgba(4,5,12,0.85) 100%);
+}
+.hero-mesh{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(ellipse 65% 55% at 15% 50%,rgba(108,99,255,.13) 0%,transparent 65%),
+  radial-gradient(ellipse 55% 45% at 85% 25%,rgba(129,140,248,.09) 0%,transparent 55%)}
+.hero .orb{z-index:2}
+.hero>div:last-child{position:relative;z-index:3}
+
 @media(max-width:780px){
   .det-inner{flex-direction:column}
   .det-left{width:100%;min-height:240px}
@@ -736,6 +811,16 @@ footer{background:#05060c;color:rgba(255,255,255,0.38);padding:56px 32px 28px}
 
 <!-- ══ HERO ══ -->
 <section class="hero">
+  <!-- Hero background video — silent GIF-style loop, no controls -->
+  <div class="hero-video-wrap">
+    <video autoplay muted loop playsinline disablepictureinpicture
+      style="position:absolute;top:50%;left:50%;min-width:100%;min-height:100%;width:auto;height:auto;transform:translate(-50%,-50%);pointer-events:none;object-fit:cover">
+      <!-- Tech/electronics close-up — free Pexels video, no signup needed -->
+      <source src="https://videos.pexels.com/video-files/3129957/3129957-uhd_2560_1440_25fps.mp4" type="video/mp4">
+      <!-- Fallback: different tech video -->
+      <source src="https://videos.pexels.com/video-files/2278095/2278095-hd_1920_1080_30fps.mp4" type="video/mp4">
+    </video>
+  </div>
   <div class="hero-mesh"></div>
   <div style="position:relative">
     <div class="hero-tag"><span class="hero-dot"></span> Fresh Drops · Curated Picks</div>
@@ -1279,10 +1364,7 @@ function renderProds(){
     <div class="c-slider" id="cs-${p.id}">
       ${imgs.map(u=>`<img class="c-slide" src="${u}" alt="${p.name}" loading="lazy">`).join('')}
     </div>
-    ${hasMulti?`
-    <button class="c-arr l" onclick="event.stopPropagation();slideCard('${p.id}',-1)">‹</button>
-    <button class="c-arr r" onclick="event.stopPropagation();slideCard('${p.id}',1)">›</button>
-    <div class="c-dots" id="cd-${p.id}">${imgs.map((_,i)=>`<button class="c-dot${i===0?' on':''}" onclick="event.stopPropagation();goCard('${p.id}',${i})"></button>`).join('')}</div>`:''}
+    ${hasMulti?`<div class="c-dots" id="cd-${p.id}">${imgs.map((_,i)=>`<div class="c-dot${i===0?' on':''}"></div>`).join('')}</div>`:''}
   </div>
   <div class="c-body">
     <div class="c-cat">${catName(p.cat)}</div>
@@ -1317,7 +1399,7 @@ function renderProds(){
       const wrap=document.getElementById('cw-'+p.id);
       if(!wrap)return;
       let idx=0,timer;
-      wrap.addEventListener('mouseenter',()=>{timer=setInterval(()=>{idx=(idx+1)%p.imgs.length;goCard(p.id,idx)},1400)});
+      wrap.addEventListener('mouseenter',()=>{timer=setInterval(()=>{idx=(idx+1)%p.imgs.length;goCard(p.id,idx)},800)});
       wrap.addEventListener('mouseleave',()=>{clearInterval(timer);goCard(p.id,0);idx=0});
     }
   });
@@ -1763,6 +1845,101 @@ function toast(msg){
 load();
 renderProds();
 updCartBadge();
+
+// ════════════════════════════════════════
+//  CUSTOM CURSOR — solid, always visible
+// ════════════════════════════════════════
+(function(){
+  const cur=document.getElementById('ph-cursor');
+  const ring=document.getElementById('ph-ring');
+  if(!cur||!ring)return;
+  // ensure they're always the last children of body (above everything)
+  document.body.appendChild(cur);
+  document.body.appendChild(ring);
+  let mx=window.innerWidth/2,my=window.innerHeight/2;
+  let rx=mx,ry=my;
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    cur.style.left=mx+'px';cur.style.top=my+'px';
+  });
+  (function loop(){
+    rx+=(mx-rx)*0.13;ry+=(my-ry)*0.13;
+    ring.style.left=Math.round(rx*10)/10+'px';
+    ring.style.top=Math.round(ry*10)/10+'px';
+    requestAnimationFrame(loop);
+  })();
+  document.addEventListener('mouseover',e=>{
+    const t=e.target;
+    if(t.closest('.c-img-wrap,.det-left')){
+      document.body.classList.remove('cursor-hover');
+      document.body.classList.add('cursor-img');
+    } else if(t.closest('button,a,.cat-pill,.glass-toggle')){
+      document.body.classList.remove('cursor-img');
+      document.body.classList.add('cursor-hover');
+    }
+  });
+  document.addEventListener('mouseout',e=>{
+    const t=e.target;
+    if(t.closest('.c-img-wrap,.det-left')){
+      document.body.classList.remove('cursor-img');
+    } else if(t.closest('button,a,.cat-pill,.glass-toggle')){
+      document.body.classList.remove('cursor-hover');
+    }
+  });
+  document.addEventListener('mousedown',()=>{cur.style.transform='translate(-50%,-50%) scale(0.65)'});
+  document.addEventListener('mouseup',()=>{cur.style.transform='translate(-50%,-50%) scale(1)'});
+  // hide default cursor on dynamically added elements
+  document.addEventListener('mouseleave',()=>{cur.style.opacity='0';ring.style.opacity='0'});
+  document.addEventListener('mouseenter',()=>{cur.style.opacity='1';ring.style.opacity='0.55'});
+})();
+
+// ════════════════════════════════════════
+//  SCROLL FADE-IN / FADE-OUT
+// ════════════════════════════════════════
+(function(){
+  function makeRevealObserver(){
+    return new IntersectionObserver(entries=>{
+      entries.forEach(en=>{
+        if(en.isIntersecting){
+          en.target.classList.add('visible');
+        } else {
+          en.target.classList.remove('visible');
+        }
+      });
+    },{threshold:0.1,rootMargin:'0px 0px -30px 0px'});
+  }
+  const io=makeRevealObserver();
+  const observed=new WeakSet();
+  function revealAll(){
+    // cards in product grid
+    document.querySelectorAll('#prodGrid .p-card, #adminGrid .a-card, #mgrGrid .m-card').forEach((el,i)=>{
+      if(observed.has(el))return;
+      observed.add(el);
+      el.classList.add('reveal');
+      el.style.transitionDelay=(i%4)*0.07+'s';
+      io.observe(el);
+    });
+    // section headings + feature items
+    document.querySelectorAll('.feat-item,.sec-title,.sec-count,.cat-bar').forEach(el=>{
+      if(observed.has(el))return;
+      observed.add(el);
+      el.classList.add('reveal');
+      io.observe(el);
+    });
+  }
+  revealAll();
+  // Watch for new cards being injected
+  const grids=['prodGrid','adminGrid','mgrGrid'];
+  grids.forEach(gid=>{
+    const el=document.getElementById(gid);
+    if(el)new MutationObserver(()=>setTimeout(revealAll,50)).observe(el,{childList:true});
+  });
+})();
 </script>
+
+<!-- Cursor elements — always last in body so they sit on top of everything -->
+<div id="ph-cursor"></div>
+<div id="ph-ring"></div>
+
 </body>
 </html>
